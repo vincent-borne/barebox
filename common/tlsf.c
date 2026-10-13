@@ -610,6 +610,7 @@ static block_header_t* __block_locate_free(control_t* control, size_t size)
 static block_header_t* block_locate_free(control_t* control, size_t size)
 {
 	block_header_t *block;
+	size_t pool_size = size;
 
 	block = __block_locate_free(control, size);
 	if (block)
@@ -618,8 +619,18 @@ static block_header_t* block_locate_free(control_t* control, size_t size)
 	if (!control->request_store || !size)
 		return NULL;
 
+	/*
+	** Account for mapping_search() rounding. A pool large enough for
+	** size may otherwise be inserted below the class searched on retry.
+	*/
+	if (size >= SMALL_BLOCK_SIZE)
+	{
+		pool_size = align_up(size, (size_t)1 << (tlsf_fls_sizet(size)
+						- SL_INDEX_COUNT_LOG2));
+	}
+
 	control->request_store(tlsf_cast(tlsf_t, control),
-			       size + tlsf_pool_overhead());
+			       pool_size + tlsf_pool_overhead());
 
 	return __block_locate_free(control, size);
 }
