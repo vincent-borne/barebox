@@ -32,6 +32,7 @@ config SELFTEST_ENABLE_ALL
 	select SELFTEST_RANGE
 	select SELFTEST_PRINTF
 	select SELFTEST_MALLOC
+	select SELFTEST_TLSF if MALLOC_TLSF
 	select SELFTEST_PROGRESS_NOTIFIER
 	select SELFTEST_OF_MANIPULATION
 	select SELFTEST_ENVIRONMENT_VARIABLES if ENVIRONMENT_VARIABLES
@@ -69,6 +70,12 @@ config SELFTEST_MALLOC
 	bool "malloc() selftest"
 	help
 	  Tests barebox memory allocator
+
+config SELFTEST_TLSF
+	bool "TLSF heap growth selftest"
+	depends on MALLOC_TLSF
+	help
+	  Tests TLSF allocation when the heap grows
 
 config SELFTEST_TALLOC
 	bool "talloc() selftest"
